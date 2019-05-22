@@ -1,5 +1,7 @@
 import React from "react";
-import pf from 'petfinder-client'
+import pf from 'petfinder-client';
+import SearchBox from './SearchBox';
+import { Consumer } from './SearchContext';
 // components
 import Pet from "./Pet";
 
@@ -15,10 +17,18 @@ class Results extends React.Component {
   }
 
   componentDidMount() {
-    petfinder.pet.find({
-      output: "full",
-      location: "Minneapolis, MN"
-    }).then(data => {
+    this.search();
+  }
+
+  search = () => {
+    petfinder.pet
+    .find({
+     output: 'full',
+      location: this.props.searchParams.location,
+      animal: this.props.searchParams.animal,
+      breed: this.props.searchParams.breed
+    })
+    .then(data => {
         let pets
 
         // check if pets returned something
@@ -44,6 +54,7 @@ class Results extends React.Component {
   render() {
     return (
       <div className="search">
+        <SearchBox search={this.search} />
         {this.state.pets.map(pet => {
           // sometimes pets have multiple breeds, so we need to check that
           let breed
@@ -70,4 +81,10 @@ class Results extends React.Component {
   }
 }
 
-export default Results;
+export default function ResultsWithContext(props) {
+  return (
+    <Consumer>
+      {context => <Results {...props} searchParams={context} />}
+    </Consumer>
+  )
+};
